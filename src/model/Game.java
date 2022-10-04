@@ -50,8 +50,22 @@ public class Game {
         row.set(index, mark);
     }
 
-    public void checkOccupiedSpaced() {
-
+    public boolean isOccupied(int row, int column) {
+        boolean occupied = false;
+        if (row == 0) {
+            if (!row1.get(column).equalsIgnoreCase(" ")) {
+                occupied = true;
+            }
+        } else if (row == 1) {
+            if (!row2.get(column).equalsIgnoreCase(" ")) {
+                occupied = true;
+            }
+        } else if (row == 2) {
+            if (!row3.get(column).equalsIgnoreCase(" ")) {
+                occupied = true;
+            }
+        }
+        return occupied;
     }
 
     public int getRowIndex(String mark) {
@@ -59,7 +73,7 @@ public class Game {
         boolean chosenRow = false;
         int rowIndex = -1;
         while (!chosenRow) {
-            System.out.println("På hvilken række, vil du sætte dit '" + mark + "'?");
+            System.out.println("Choose row to set your '" + mark + "'?");
             input = scanner.nextLine();
             switch (Integer.parseInt(input)) {
                 case 1 -> {
@@ -74,7 +88,7 @@ public class Game {
                     rowIndex = 2;
                     chosenRow = true;
                 }
-                default -> System.out.println("Ikke gyldigt input. Vælg en række mellem 1 - 3.");
+                default -> System.out.println("Not a valid input. Please choose a number between 1 - 3.");
             }
         }
         return rowIndex;
@@ -85,7 +99,7 @@ public class Game {
         boolean chosenColumn = false;
         int columnIndex = -1;
         while (!chosenColumn) {
-            System.out.println("I hvilken kolonne, vil du sætte dit '" + mark + "'?");
+            System.out.println("Choose column to set your '" + mark + "'?");
             input = scanner.nextLine();
             switch (Integer.parseInt(input)) {
                 case 1 -> {
@@ -100,7 +114,7 @@ public class Game {
                     columnIndex = 2;
                     chosenColumn = true;
                 }
-                default -> System.out.println("Ikke gyldigt input. Vælg en række mellem 1 - 3.");
+                default -> System.out.println("Not a valid input. Please choose a number between 1 - 3.");
             }
         }
         return columnIndex;
@@ -116,9 +130,22 @@ public class Game {
         }
 
         // Ask and set mark
-        int rowIndex = getRowIndex(mark);
-        int columnIndex = getColumnIndex(mark);
-        gameBoard.get(rowIndex).set(columnIndex,mark); // TODO: Vælg kolonne index
+        boolean validTurn = false;
+        int rowIndex = -1;
+        int columnIndex = -1;
+        while (!validTurn) {
+            rowIndex = getRowIndex(mark);
+            columnIndex = getColumnIndex(mark);
+            if (!isOccupied(rowIndex, columnIndex)) {
+                validTurn = true;
+            } else {
+                System.out.println("ERROR! Space is occupied.");
+                getBoard();
+            }
+        }
+
+
+        gameBoard.get(rowIndex).set(columnIndex,mark);
 
         // Swap player turn
         player1Turn = !player1Turn;
