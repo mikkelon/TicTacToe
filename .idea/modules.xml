@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/TicTacToe.iml" filepath="$PROJECT_DIR$/TicTacToe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/version_1/version_1.iml" filepath="$PROJECT_DIR$/version_1/version_1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/version_2/version_2.iml" filepath="$PROJECT_DIR$/version_2/version_2.iml" />
     </modules>
   </component>
 </project>
