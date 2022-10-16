@@ -12,13 +12,6 @@ public class Player {
         this.points = 0;
     }
 
-    public Player(String name, String mark, boolean starts) {
-        this.name = name;
-        this.mark = mark;
-        this.hasTurn = starts;
-        this.points = 0;
-    }
-
     public boolean hasTurn() {
         return this.hasTurn;
     }
@@ -31,7 +24,15 @@ public class Player {
         return this.mark;
     }
 
+    public void setMark(String mark) {
+        this.mark = mark;
+    }
+
     public String getName() {
         return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
