@@ -4,11 +4,11 @@ import javafx.scene.control.Button;
 
 public class Game {
     private final GameLog gameLog = new GameLog();
-    private Player player;
-    private Player computer;
+    private Player player, computer, startingPlayer;
     private final Button[][] gameGrid = new Button[3][3];
-    private boolean gameOver;
-    private int turns;
+    private boolean gameOver, randomStartingPlayer;
+    private int turns, drawCounts;
+    //private String startingPlayer = ""; // Should either be 'computer', '<playername>' or 'random';
 
     public Game() {
         for (int i = 0; i < gameGrid.length; i++) {
@@ -20,6 +20,18 @@ public class Game {
         this.computer = (new Player("Computer", "O"));
         this.gameOver = false;
         this.turns = 0;
+    }
+
+    public int getDrawCounts() {
+        return drawCounts;
+    }
+
+    public void setStartingPlayer(Player startingPlayer) {
+        this.startingPlayer = startingPlayer;
+    }
+
+    public void setRandomStartingPlayer(boolean randomStartingPlayer) {
+        this.randomStartingPlayer = randomStartingPlayer;
     }
 
     public boolean isGameOver() {
@@ -96,33 +108,50 @@ public class Game {
             computerCheckBlockOrWin(this.player);
         }
 
-        // Priority 3 - Place mark in a corner cell opposite the other player
-        if (computer.hasTurn()) {
-            if (gameGrid[0][0].getText().equalsIgnoreCase(player.getMark())
-                    && gameGrid[2][2].getText().equalsIgnoreCase("")) {
-                gameGrid[2][2].setText(computer.getMark());
-                swapTurn();
-            } else if (gameGrid[0][2].getText().equalsIgnoreCase(player.getMark())
-                    && gameGrid[2][0].getText().equalsIgnoreCase("")) {
-                gameGrid[2][0].setText(computer.getMark());
-                swapTurn();
-            } else if (gameGrid[2][2].getText().equalsIgnoreCase(player.getMark())
-                    && gameGrid[0][0].getText().equalsIgnoreCase("")) {
-                gameGrid[0][0].setText(computer.getMark());
-                swapTurn();
-            } else if (gameGrid[2][0].getText().equalsIgnoreCase(player.getMark())
-                    && gameGrid[0][2].getText().equalsIgnoreCase("")) {
-                gameGrid[0][2].setText(computer.getMark());
-                swapTurn();
-            }
-        }
-
-        // Priority 4 - Place mark in the middle cell
+        // Priority 3 - Place mark in the middle cell
         if (computer.hasTurn()) {
             if (gameGrid[1][1].getText().equalsIgnoreCase("")) {
                 gameGrid[1][1].setText(computer.getMark());
                 gameLog.addLog(gameLog.LOG_TURN_SUCCESS, computer);
                 swapTurn();
+            }
+        }
+
+        // Priority 4 - Force player to block to avoid player winning
+        if (computer.hasTurn()) {
+            if (turns == 3 && startingPlayer == player) {
+                if (gameGrid[0][0].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[2][2].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[0][1].setText(computer.getMark());
+                    swapTurn();
+                } else if (gameGrid[2][0].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[0][2].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[0][1].setText(computer.getMark());
+                    swapTurn();
+                }
+            }
+        }
+
+        // Priority 4.5 - Block player from filling out corner next to two player filled side cells
+        if (computer.hasTurn()) {
+            if (turns == 3 && startingPlayer == player) {
+                if (gameGrid[0][1].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[1][0].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[0][0].setText(computer.getMark());
+                    swapTurn();
+                } else if (gameGrid[0][1].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[1][2].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[0][2].setText(computer.getMark());
+                    swapTurn();
+                } else if (gameGrid[1][2].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[2][1].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[2][2].setText(computer.getMark());
+                    swapTurn();
+                } else if (gameGrid[2][1].getText().equalsIgnoreCase(player.getMark())
+                        && gameGrid[1][0].getText().equalsIgnoreCase(player.getMark())) {
+                    gameGrid[2][0].setText(computer.getMark());
+                    swapTurn();
+                }
             }
         }
 
@@ -373,28 +402,40 @@ public class Game {
         if (gameOver) {
             if (winningPlayer != null) {
                 gameLog.addLog(gameLog.LOG_PLAYER_WON, winningPlayer);
+                winningPlayer.addPoint();
             } else {
+                this.drawCounts++;
                 gameLog.addLog(gameLog.LOG_DRAW);
             }
         }
     }
 
-    public void chooseStartingPlayer() {
-        double random = Math.random();
-        if (random > 0.5) {
-            player.setTurn(true);
-            computer.setTurn(false);
+    public void setStartingPlayer() {
+        if (randomStartingPlayer) {
+            double random = Math.random();
+            if (random > 0.5) {
+                player.setTurn(true);
+                computer.setTurn(false);
+            } else {
+                player.setTurn(false);
+                computer.setTurn(true);
+            }
+            startingPlayer = playerHasTurn();
         } else {
-            player.setTurn(false);
-            computer.setTurn(true);
+            if (startingPlayer == player) {
+                player.setTurn(true);
+                computer.setTurn(false);
+            } else {
+                player.setTurn(false);
+                computer.setTurn(true);
+            }
         }
-        gameLog.addLog(gameLog.LOG_PLAYER_STARTS, playerHasTurn());
+        gameLog.addLog(gameLog.LOG_PLAYER_STARTS, startingPlayer);
     }
 
     public void newGame() {
         this.gameOver = false;
         this.turns = 0;
         gameLog.clear();
-        chooseStartingPlayer();
     }
 }
